@@ -1,0 +1,6 @@
+{
+    "dropbox_token": "",
+    "upload_enabled": true,
+    "auto_sync": true,
+    "sync_interval": 300
+} 

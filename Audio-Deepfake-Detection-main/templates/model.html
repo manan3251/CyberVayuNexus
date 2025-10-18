@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audio Deepfake Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f2f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #1a73e8;
+        }
+        .upload-section {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            border: 2px dashed #ccc;
+            border-radius: 5px;
+        }
+        .result-section {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .result-real {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+        }
+        .result-fake {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+        }
+        .recording-section {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .recording-button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 10px;
+        }
+        .start-recording {
+            background-color: #dc3545;
+            color: white;
+        }
+        .stop-recording {
+            background-color: #28a745;
+            color: white;
+        }
+        .recording-indicator {
+            display: none;
+            margin: 10px 0;
+            color: #dc3545;
+        }
+        .recording-indicator.active {
+            display: block;
+        }
+        .recording-indicator::before {
+            content: "●";
+            color: #dc3545;
+            margin-right: 5px;
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .error-message {
+            color: #dc3545;
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            background-color: #f8d7da;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Audio Deepfake Detection</h1>
+        
+        <div class="recording-section">
+            <button id="startRecording" class="recording-button start-recording">Start Recording</button>
+            <button id="stopRecording" class="recording-button stop-recording" disabled>Stop Recording</button>
+            <div id="recordingIndicator" class="recording-indicator">Recording in progress...</div>
+            <div id="errorMessage" class="error-message"></div>
+        </div>
+
+        <div class="upload-section">
+            <form id="uploadForm" enctype="multipart/form-data">
+                <input type="file" id="audioFile" name="file" accept="audio/*" required>
+                <button type="submit">Analyze Audio</button>
+            </form>
+        </div>
+        <div id="result" class="result-section"></div>
+    </div>
+
+    <script>
+        const startButton = document.getElementById('startRecording');
+        const stopButton = document.getElementById('stopRecording');
+        const recordingIndicator = document.getElementById('recordingIndicator');
+        const errorMessage = document.getElementById('errorMessage');
+        const resultDiv = document.getElementById('result');
+        let isRecording = false;
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showResult(prediction, confidence) {
+            resultDiv.style.display = 'block';
+            resultDiv.className = `result-section result-${prediction.toLowerCase()}`;
+            resultDiv.innerHTML = `
+                <h3>Result:</h3>
+                <p>This audio appears to be: <strong>${prediction}</strong></p>
+                <p>Confidence: ${(confidence * 100).toFixed(2)}%</p>
+            `;
+        }
+
+        startButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/start_recording', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.status === 'recording_started') {
+                    isRecording = true;
+                    startButton.disabled = true;
+                    stopButton.disabled = false;
+                    recordingIndicator.classList.add('active');
+                    resultDiv.style.display = 'none';
+                }
+            } catch (error) {
+                showError('Error starting recording: ' + error.message);
+            }
+        });
+
+        stopButton.addEventListener('click', async () => {
+            try {
+                const response = await fetch('/stop_recording', {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.status === 'recording_stopped') {
+                    isRecording = false;
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                    recordingIndicator.classList.remove('active');
+                    
+                    if (data.error) {
+                        showError(data.error);
+                    } else {
+                        showResult(data.prediction, data.confidence);
+                    }
+                }
+            } catch (error) {
+                showError('Error stopping recording: ' + error.message);
+            }
+        });
+
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData();
+            formData.append('file', document.getElementById('audioFile').files[0]);
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+
+                if (data.error) {
+                    showError(data.error);
+                    return;
+                }
+
+                showResult(data.prediction, data.confidence);
+            } catch (error) {
+                showError('Error analyzing audio: ' + error.message);
+            }
+        });
+    </script>
+</body>
+</html>

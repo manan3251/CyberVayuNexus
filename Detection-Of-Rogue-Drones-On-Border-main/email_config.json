@@ -1,0 +1,8 @@
+{
+    "email": {
+        "smtp_server": "smtp.gmail.com",
+        "smtp_port": 587,
+        "sender_email": "anuragsrivastava241529@gmail.com",
+        "sender_password": "oqei jrsi kpxa egiy"
+    }
+} 

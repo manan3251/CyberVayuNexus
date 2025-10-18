@@ -1,0 +1,6 @@
+Timestamp,Drone_IP,Confidence,Size,Location_X,Location_Y,Source,Notes,Frame_Number,Network_Info
+2025-04-12 06:42:01,192.168.0.135,0.86,286x305,269,174,webcam,person,N/A,"Host: Basedanurag, IP: 192.168.0.135"
+2025-04-12 06:42:01,192.168.0.135,0.82,284x306,269,174,webcam,person,N/A,"Host: Basedanurag, IP: 192.168.0.135"
+2025-04-12 06:42:01,192.168.0.135,0.82,285x305,269,174,webcam,person,N/A,"Host: Basedanurag, IP: 192.168.0.135"
+2025-04-12 06:42:01,192.168.0.135,0.83,286x306,269,174,webcam,person,N/A,"Host: Basedanurag, IP: 192.168.0.135"
+2025-04-12 06:42:01,192.168.0.135,0.85,282x307,272,173,webcam,person,N/A,"Host: Basedanurag, IP: 192.168.0.135"

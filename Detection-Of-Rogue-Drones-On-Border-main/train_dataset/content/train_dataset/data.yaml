@@ -1,0 +1,7 @@
+path: ../train_dataset/content/train_dataset  # dataset root dir
+train: train_dataset/content/train_dataset/images/good  # train images (relative to 'path')
+val: train_dataset/content/train_dataset/images/good  # val images (relative to 'path')
+
+# Classes
+nc: 1  # number of classes
+names: ['drone']  # class names 
